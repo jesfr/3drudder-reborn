@@ -1,7 +1,8 @@
 # 3dRudder Reborn
 
 Redonne vie à ton **3dRudder** — le contrôleur pédestre de 3dRudder (entreprise en faillite depuis 2023).
-Conçu pour redonner accès au jeu aux personnes à mobilité
+
+Conçu, entre autres, pour redonner accès au jeu aux personnes à mobilité
 
 
 Ce logiciel remplace l'application officielle abandonnée et fonctionne **sans installation**, en un seul fichier `.exe`.
