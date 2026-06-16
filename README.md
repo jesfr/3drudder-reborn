@@ -1,6 +1,8 @@
 # 3dRudder Reborn
 
 Redonne vie à ton **3dRudder** — le contrôleur pédestre de 3dRudder (entreprise en faillite depuis 2023).
+Conçu pour redonner accès au jeu aux personnes à mobilité
+
 
 Ce logiciel remplace l'application officielle abandonnée et fonctionne **sans installation**, en un seul fichier `.exe`.
 
@@ -21,7 +23,7 @@ Ce logiciel remplace l'application officielle abandonnée et fonctionne **sans i
 - **Étalonnage** — définit la position neutre du périphérique
 - **Flash firmware** — met à jour le firmware si nécessaire
 - **FR / EN** — interface bilingue
-- **Réglages sauvegardés** — tout est mémorisé d'une session à l'autre
+- **Réglages sauvegardés** — tout est mémorisé d'une session à l'autre dans un fichier qui sera à la racine du dossier ou est l'exécutable.
 
 ---
 
