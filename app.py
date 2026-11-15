@@ -115,6 +115,18 @@ STRINGS = {
         "fw_file":       "Fichier disponible",
         "fw_not_found":  "Non trouvé",
         "fw_flash":      "Flasher le firmware",
+        "fw_incompat": (
+            "⛔  MISE À JOUR IMPOSSIBLE\n\n"
+            "Votre boîtier (REV_{fw}) utilise un ancien bootloader\n"
+            "incompatible avec cet installeur (NS_1442).\n\n"
+            "Votre firmware fonctionne correctement tel quel —\n"
+            "il n'est pas nécessaire de le mettre à jour."
+        ),
+        "fw_uptodate": (
+            "✅  FIRMWARE À JOUR\n\n"
+            "Votre boîtier est déjà en version 1442.\n"
+            "Aucune mise à jour n'est nécessaire."
+        ),
         "fw_warn": (
             "⚠  NE FLASHEZ QUE SI VOTRE 3dRUDDER\n"
             "NE FONCTIONNE PAS DU TOUT.\n\n"
@@ -197,6 +209,18 @@ STRINGS = {
         "fw_file":       "Available file",
         "fw_not_found":  "Not found",
         "fw_flash":      "Flash firmware",
+        "fw_incompat": (
+            "⛔  UPDATE NOT POSSIBLE\n\n"
+            "Your device (REV_{fw}) uses an old bootloader\n"
+            "incompatible with this installer (NS_1442).\n\n"
+            "Your firmware works fine as-is —\n"
+            "no update is needed."
+        ),
+        "fw_uptodate": (
+            "✅  FIRMWARE UP TO DATE\n\n"
+            "Your device is already on version 1442.\n"
+            "No update is needed."
+        ),
         "fw_warn": (
             "⚠  ONLY FLASH IF YOUR 3dRUDDER\n"
             "DOES NOT WORK AT ALL.\n\n"
@@ -867,6 +891,24 @@ class App(ctk.CTk):
                      ).pack(anchor="w", padx=24, pady=(24, 0))
 
         fw = get_firmware_version()
+        try:
+            fw_int = int(fw)
+        except (ValueError, TypeError):
+            fw_int = None
+
+        # Compatibility check:
+        # - REV < 1437 → old bootloader (≤1114), incompatible with NS_1442 installer
+        # - REV == 1442 → already up to date
+        # - REV == 1437 or Unknown → allow flash (normal path)
+        if fw_int is not None and fw_int < 1437:
+            flash_state = "incompat"
+        elif fw_int == 1442:
+            flash_state = "uptodate"
+        else:
+            flash_state = "ok"
+
+        win.geometry("460x420" if flash_state != "ok" else "460x380")
+
         info = ctk.CTkFrame(win, fg_color="#1a1a1a", corner_radius=10)
         info.pack(fill="x", padx=24, pady=(12, 0))
         for label_key, value, color in [
@@ -882,21 +924,38 @@ class App(ctk.CTk):
                          font=ctk.CTkFont(size=12, weight="bold"),
                          text_color=color).pack(side="right")
 
-        warn = ctk.CTkFrame(win, fg_color="#3a1a00", corner_radius=10)
-        warn.pack(fill="x", padx=24, pady=(14, 0))
-        ctk.CTkLabel(warn, text=self.t("fw_warn"),
-                     font=ctk.CTkFont(size=12), text_color="#ff9944",
-                     justify="center").pack(padx=16, pady=14)
+        if flash_state == "incompat":
+            msg_frame = ctk.CTkFrame(win, fg_color="#1a0a0a", corner_radius=10)
+            msg_frame.pack(fill="x", padx=24, pady=(14, 0))
+            msg_text = self.t("fw_incompat").replace("{fw}", fw)
+            ctk.CTkLabel(msg_frame, text=msg_text,
+                         font=ctk.CTkFont(size=12), text_color="#e74c3c",
+                         justify="center").pack(padx=16, pady=14)
+        elif flash_state == "uptodate":
+            msg_frame = ctk.CTkFrame(win, fg_color="#0a1a0a", corner_radius=10)
+            msg_frame.pack(fill="x", padx=24, pady=(14, 0))
+            ctk.CTkLabel(msg_frame, text=self.t("fw_uptodate"),
+                         font=ctk.CTkFont(size=12), text_color="#2ecc71",
+                         justify="center").pack(padx=16, pady=14)
+        else:
+            warn = ctk.CTkFrame(win, fg_color="#3a1a00", corner_radius=10)
+            warn.pack(fill="x", padx=24, pady=(14, 0))
+            ctk.CTkLabel(warn, text=self.t("fw_warn"),
+                         font=ctk.CTkFont(size=12), text_color="#ff9944",
+                         justify="center").pack(padx=16, pady=14)
 
         def do_flash():
             if not FW_INSTALLER.exists(): return
             win.destroy()
             os.startfile(str(FW_INSTALLER))
 
-        ctk.CTkButton(win, text=self.t("fw_flash"), height=40,
+        btn = ctk.CTkButton(win, text=self.t("fw_flash"), height=40,
                       font=ctk.CTkFont(size=13, weight="bold"),
                       fg_color="#8b0000", hover_color="#6b0000",
-                      command=do_flash).pack(fill="x", padx=24, pady=(14, 20))
+                      command=do_flash)
+        btn.pack(fill="x", padx=24, pady=(14, 20))
+        if flash_state in ("incompat", "uptodate"):
+            btn.configure(state="disabled", fg_color="#444444")
 
     # ── Feedback window ───────────────────────────────────────────────────────
     def _open_feedback_window(self):
